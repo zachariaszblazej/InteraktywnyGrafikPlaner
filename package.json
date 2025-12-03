@@ -5,7 +5,9 @@
     "main": "src/main/main.js",
     "scripts": {
         "start": "electron .",
-        "dev": "electron . --enable-logging"
+        "dev": "electron . --enable-logging",
+        "build": "electron-builder --win portable",
+        "build:dir": "electron-builder --win portable --dir"
     },
     "keywords": [
         "electron",
@@ -16,6 +18,24 @@
     "author": "",
     "license": "MIT",
     "devDependencies": {
-        "electron": "^28.0.0"
+        "electron": "^28.0.0",
+        "electron-builder": "^24.9.1"
+    },
+    "build": {
+        "appId": "com.interaktywny.grafikplaner",
+        "productName": "Interaktywny Grafik Planer",
+        "directories": {
+            "output": "dist"
+        },
+        "files": [
+            "src/**/*"
+        ],
+        "win": {
+            "target": "portable",
+            "icon": null
+        },
+        "portable": {
+            "artifactName": "${productName}-Portable.exe"
+        }
     }
 }
