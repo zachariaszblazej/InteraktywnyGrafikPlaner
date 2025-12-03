@@ -140,6 +140,45 @@ class BoardStateManager {
         }
     }
 
+    /**
+     * Przesuwa wiersz w górę (zamienia z poprzednim)
+     * @param {number} rowIndex - indeks wiersza do przesunięcia
+     * @returns {boolean} czy operacja się powiodła
+     */
+    moveRowUp(rowIndex) {
+        if (rowIndex > 0 && rowIndex < this.state.rows.length) {
+            this._swapRows(rowIndex, rowIndex - 1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Przesuwa wiersz w dół (zamienia z następnym)
+     * @param {number} rowIndex - indeks wiersza do przesunięcia
+     * @returns {boolean} czy operacja się powiodła
+     */
+    moveRowDown(rowIndex) {
+        if (rowIndex >= 0 && rowIndex < this.state.rows.length - 1) {
+            this._swapRows(rowIndex, rowIndex + 1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Zamienia miejscami dwa wiersze
+     * @private
+     * @param {number} indexA - indeks pierwszego wiersza
+     * @param {number} indexB - indeks drugiego wiersza
+     */
+    _swapRows(indexA, indexB) {
+        const temp = this.state.rows[indexA];
+        this.state.rows[indexA] = this.state.rows[indexB];
+        this.state.rows[indexB] = temp;
+        this._reindexRows();
+    }
+
     toggleTileState(rowIndex, columnIndex) {
         const row = this.state.rows[rowIndex];
         if (row && row.tiles[columnIndex]) {
@@ -319,9 +358,45 @@ class BoardRenderer {
         tr.className = `board-row ${row.includedInCalculations ? '' : 'excluded'}`;
         tr.dataset.rowIndex = rowIndex;
 
+        const totalRows = this.boardManager.getState().rows.length;
+
+        // Kontrolki wiersza (checkbox + przyciski przesuwania)
+        const tdControls = document.createElement('td');
+        tdControls.className = 'row-controls';
+
+        // Kontener na wszystkie kontrolki w jednej linii
+        const controlsContent = document.createElement('div');
+        controlsContent.className = 'row-controls-content';
+
+        // Kontener na przyciski przesuwania
+        const moveButtons = document.createElement('div');
+        moveButtons.className = 'move-buttons';
+
+        // Przycisk w górę
+        const btnUp = document.createElement('button');
+        btnUp.className = 'btn-move btn-move-up';
+        btnUp.innerHTML = '▲';
+        btnUp.title = 'Przesuń w górę';
+        btnUp.disabled = rowIndex === 0;
+        btnUp.addEventListener('click', () => {
+            this.onStateChange('moveRowUp', { rowIndex });
+        });
+        moveButtons.appendChild(btnUp);
+
+        // Przycisk w dół
+        const btnDown = document.createElement('button');
+        btnDown.className = 'btn-move btn-move-down';
+        btnDown.innerHTML = '▼';
+        btnDown.title = 'Przesuń w dół';
+        btnDown.disabled = rowIndex === totalRows - 1;
+        btnDown.addEventListener('click', () => {
+            this.onStateChange('moveRowDown', { rowIndex });
+        });
+        moveButtons.appendChild(btnDown);
+
+        controlsContent.appendChild(moveButtons);
+
         // Checkbox
-        const tdCheckbox = document.createElement('td');
-        tdCheckbox.className = 'row-controls';
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.className = 'row-checkbox';
@@ -333,8 +408,10 @@ class BoardRenderer {
                 value: e.target.checked
             });
         });
-        tdCheckbox.appendChild(checkbox);
-        tr.appendChild(tdCheckbox);
+        controlsContent.appendChild(checkbox);
+
+        tdControls.appendChild(controlsContent);
+        tr.appendChild(tdControls);
 
         // Header input
         const tdHeader = document.createElement('td');
@@ -581,6 +658,12 @@ class AppController {
                 break;
             case 'setColumnRequired':
                 this.boardManager.setColumnRequiredWorkers(data.columnIndex, data.value);
+                break;
+            case 'moveRowUp':
+                this.boardManager.moveRowUp(data.rowIndex);
+                break;
+            case 'moveRowDown':
+                this.boardManager.moveRowDown(data.rowIndex);
                 break;
             default:
                 console.warn('Nieznana akcja:', action);

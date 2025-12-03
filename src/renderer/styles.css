@@ -131,8 +131,8 @@ body {
 
 /* Header cells */
 .row-controls-header {
-    width: 40px;
-    min-width: 40px;
+    width: 80px;
+    min-width: 80px;
 }
 
 .row-header-cell {
@@ -199,6 +199,45 @@ body {
 .row-controls {
     text-align: center;
     vertical-align: middle;
+    min-width: 80px;
+}
+
+.row-controls-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.move-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.btn-move {
+    width: 18px;
+    height: 12px;
+    padding: 0;
+    background-color: var(--surface-light);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 8px;
+    line-height: 1;
+    transition: all 0.2s ease;
+}
+
+.btn-move:hover:not(:disabled) {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border-color: var(--primary-color);
+}
+
+.btn-move:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
 }
 
 .row-checkbox {
