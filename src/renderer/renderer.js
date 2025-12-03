@@ -20,13 +20,13 @@ const TileState = Object.freeze({
 const TILE_STATE_ORDER = [TileState.A, TileState.PRACA, TileState.U];
 
 const DAYS_OF_WEEK = [
-    'Poniedziałek',
-    'Wtorek',
-    'Środa',
-    'Czwartek',
-    'Piątek',
-    'Sobota',
-    'Niedziela'
+    'Montag',
+    'Dienstag',
+    'Mittwoch',
+    'Donnerstag',
+    'Freitag',
+    'Samstag',
+    'Sonntag'
 ];
 
 const MAX_REQUIRED_WORKERS = 20;
@@ -189,7 +189,7 @@ class BoardStateManager {
             const isSunday = index === 6;
             const isValid = this.isColumnValid(index);
             const hasExtraOne = !isSunday && pracaCount === required + 1;
-            
+
             return {
                 index,
                 name: DAYS_OF_WEEK[index],
@@ -421,7 +421,7 @@ class BoardRenderer {
 
             const span = document.createElement('span');
             span.className = `praca-count ${status.isValid ? 'valid' : 'invalid'}`;
-            
+
             // Wyświetl "+1" jeśli jest o jeden więcej niż wymagane
             if (status.hasExtraOne) {
                 span.textContent = `${status.pracaCount} (+1)`;
