@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+    <title>Interaktywny Grafik Planer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Interaktywny Grafik Planer</h1>
+            <div class="toolbar">
+                <button id="btn-undo" class="toolbar-btn" title="Cofnij (Ctrl+Z)" disabled>
+                    ↶ Cofnij
+                </button>
+                <button id="btn-redo" class="toolbar-btn" title="Dalej (Ctrl+Y)" disabled>
+                    ↷ Dalej
+                </button>
+                <button id="btn-add-row" class="toolbar-btn btn-primary" title="Dodaj nowy wiersz">
+                    + Dodaj wiersz
+                </button>
+            </div>
+        </header>
+
+        <main class="board-container">
+            <table class="board-table">
+                <thead>
+                    <tr class="required-workers-row">
+                        <th class="row-controls-header"></th>
+                        <th class="row-header-cell"></th>
+                        <!-- Wymagana liczba pracowników - generowane dynamicznie -->
+                    </tr>
+                    <tr class="days-header-row">
+                        <th class="row-controls-header"></th>
+                        <th class="row-header-cell">Pracownik</th>
+                        <!-- Dni tygodnia - generowane dynamicznie -->
+                    </tr>
+                </thead>
+                <tbody id="board-body">
+                    <!-- Wiersze generowane dynamicznie -->
+                </tbody>
+                <tfoot>
+                    <tr class="praca-count-row">
+                        <td class="row-controls-header"></td>
+                        <td class="row-header-cell footer-label">Suma "Praca":</td>
+                        <!-- Liczniki - generowane dynamicznie -->
+                    </tr>
+                </tfoot>
+            </table>
+        </main>
+
+        <footer class="app-footer">
+            <div class="legend">
+                <span class="legend-item">
+                    <span class="legend-tile tile-a">A</span> Dostępny
+                </span>
+                <span class="legend-item">
+                    <span class="legend-tile tile-praca">Praca</span> Praca
+                </span>
+                <span class="legend-item">
+                    <span class="legend-tile tile-u">U</span> Urlop
+                </span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,21 @@
+{
+    "name": "interaktywny-grafik-planer",
+    "version": "1.0.0",
+    "description": "Aplikacja desktopowa do interaktywnego planowania grafików",
+    "main": "src/main/main.js",
+    "scripts": {
+        "start": "electron .",
+        "dev": "electron . --enable-logging"
+    },
+    "keywords": [
+        "electron",
+        "planner",
+        "schedule",
+        "grafik"
+    ],
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "electron": "^28.0.0"
+    }
+}
