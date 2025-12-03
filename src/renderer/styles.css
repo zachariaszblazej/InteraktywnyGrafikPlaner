@@ -70,6 +70,13 @@ body {
 .app-header h1 {
     font-size: 1.5rem;
     font-weight: 600;
+    text-align: center;
+    flex: 1;
+}
+
+.header-spacer {
+    width: 140px;
+    /* Szerokość toolbara żeby wycentrować tytuł */
 }
 
 /* ===================================
@@ -78,6 +85,7 @@ body {
 .toolbar {
     display: flex;
     gap: var(--spacing-sm);
+    width: 140px;
 }
 
 .toolbar-btn {
