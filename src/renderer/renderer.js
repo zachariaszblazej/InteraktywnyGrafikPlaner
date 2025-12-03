@@ -359,6 +359,7 @@ class BoardRenderer {
         row.tiles.forEach((tile, colIndex) => {
             const td = document.createElement('td');
             td.className = 'tile-cell';
+            td.dataset.columnIndex = colIndex;
 
             const tileDiv = document.createElement('div');
             tileDiv.className = this.getTileClasses(tile, row.includedInCalculations);
@@ -437,6 +438,16 @@ class BoardRenderer {
         const countCells = this.elements.pracaCountRow.querySelectorAll('.praca-count-cell');
         countCells.forEach((cell, index) => {
             cell.classList.toggle('column-valid', columnsStatus[index]?.isValid);
+        });
+
+        // Aktualizuj wszystkie komórki kafelków w każdej kolumnie
+        const rows = this.elements.boardBody.querySelectorAll('.board-row');
+        rows.forEach(row => {
+            const tileCells = row.querySelectorAll('.tile-cell');
+            tileCells.forEach(cell => {
+                const colIndex = parseInt(cell.dataset.columnIndex);
+                cell.classList.toggle('column-valid', columnsStatus[colIndex]?.isValid);
+            });
         });
     }
 
