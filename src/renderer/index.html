@@ -21,9 +21,6 @@
                 <button id="btn-redo" class="toolbar-btn" title="Dalej (Ctrl+Y)" disabled>
                     ↷ Dalej
                 </button>
-                <button id="btn-add-row" class="toolbar-btn btn-primary" title="Dodaj nowy wiersz">
-                    + Dodaj wiersz
-                </button>
             </div>
         </header>
 
@@ -47,7 +44,11 @@
                 <tfoot>
                     <tr class="praca-count-row">
                         <td class="row-controls-header"></td>
-                        <td class="row-header-cell footer-label"></td>
+                        <td class="row-header-cell footer-label">
+                            <button id="btn-add-row" class="btn-add-row" title="Dodaj nowy wiersz">
+                                + Dodaj wiersz
+                            </button>
+                        </td>
                         <!-- Liczniki - generowane dynamicznie -->
                     </tr>
                 </tfoot>

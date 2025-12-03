@@ -387,8 +387,25 @@ body {
 }
 
 .footer-label {
-    text-align: right !important;
+    text-align: left !important;
     color: var(--text-muted);
+}
+
+.btn-add-row {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-add-row:hover {
+    background-color: var(--primary-hover);
 }
 
 .praca-count {
