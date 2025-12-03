@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const path = require('path');
 const StorageService = require('../services/StorageService');
 
@@ -9,6 +9,9 @@ class MainProcess {
     }
 
     createWindow() {
+        // Usuń domyślne menu
+        Menu.setApplicationMenu(null);
+
         this.mainWindow = new BrowserWindow({
             width: 1200,
             height: 800,
