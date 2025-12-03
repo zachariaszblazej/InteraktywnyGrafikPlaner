@@ -183,14 +183,23 @@ class BoardStateManager {
     }
 
     getColumnsStatus() {
-        return this.state.columns.map((column, index) => ({
-            index,
-            name: DAYS_OF_WEEK[index],
-            requiredWorkers: column.requiredWorkers,
-            pracaCount: this.countPracaInColumn(index),
-            isValid: this.isColumnValid(index),
-            isSunday: index === 6
-        }));
+        return this.state.columns.map((column, index) => {
+            const pracaCount = this.countPracaInColumn(index);
+            const required = column.requiredWorkers;
+            const isSunday = index === 6;
+            const isValid = this.isColumnValid(index);
+            const hasExtraOne = !isSunday && pracaCount === required + 1;
+            
+            return {
+                index,
+                name: DAYS_OF_WEEK[index],
+                requiredWorkers: required,
+                pracaCount,
+                isValid,
+                isSunday,
+                hasExtraOne
+            };
+        });
     }
 }
 
@@ -412,7 +421,13 @@ class BoardRenderer {
 
             const span = document.createElement('span');
             span.className = `praca-count ${status.isValid ? 'valid' : 'invalid'}`;
-            span.textContent = status.pracaCount;
+            
+            // Wyświetl "+1" jeśli jest o jeden więcej niż wymagane
+            if (status.hasExtraOne) {
+                span.textContent = `${status.pracaCount} (+1)`;
+            } else {
+                span.textContent = status.pracaCount;
+            }
 
             td.appendChild(span);
             this.elements.pracaCountRow.appendChild(td);

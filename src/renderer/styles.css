@@ -119,6 +119,8 @@ body {
     background-color: var(--surface-color);
     border-radius: var(--border-radius);
     padding: var(--spacing-md);
+    display: flex;
+    justify-content: center;
 }
 
 .board-table {
