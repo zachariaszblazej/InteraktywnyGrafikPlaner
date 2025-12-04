@@ -75,7 +75,7 @@ body {
 }
 
 .header-spacer {
-    width: 140px;
+    width: 350px;
     /* Szerokość toolbara żeby wycentrować tytuł */
 }
 
@@ -85,7 +85,8 @@ body {
 .toolbar {
     display: flex;
     gap: var(--spacing-sm);
-    width: 140px;
+    align-items: center;
+    width: 350px;
 }
 
 .toolbar-btn {
@@ -116,6 +117,42 @@ body {
 
 .toolbar-btn.btn-primary:hover:not(:disabled) {
     background-color: var(--primary-hover);
+}
+
+/* Week Selector */
+.week-selector {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-left: var(--spacing-sm);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.week-selector label {
+    white-space: nowrap;
+}
+
+.year-input,
+.week-input {
+    width: 65px;
+    padding: 4px 6px;
+    background-color: var(--surface-light);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.week-input {
+    width: 50px;
+}
+
+.year-input:focus,
+.week-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
 }
 
 /* ===================================
@@ -164,11 +201,17 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: 2px;
 }
 
 .day-name {
     font-size: 0.85rem;
+}
+
+.day-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 400;
 }
 
 /* Required workers select */

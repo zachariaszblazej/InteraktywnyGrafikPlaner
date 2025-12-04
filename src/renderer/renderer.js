@@ -32,6 +32,97 @@ const DAYS_OF_WEEK = [
 const MAX_REQUIRED_WORKERS = 20;
 
 // ===================================
+// WEEK DATE CALCULATOR
+// ===================================
+
+/**
+ * Klasa odpowiedzialna za obliczanie dat na podstawie roku i numeru tygodnia
+ * Single Responsibility: tylko obliczenia dat
+ */
+class WeekDateCalculator {
+    /**
+     * Pobiera daty dla danego tygodnia w roku (ISO 8601 - tydzień zaczyna się od poniedziałku)
+     * @param {number} year - rok
+     * @param {number} weekNumber - numer tygodnia (1-53)
+     * @returns {Date[]} tablica 7 dat (pon-nd)
+     */
+    static getWeekDates(year, weekNumber) {
+        // Znajdź pierwszy czwartek roku (ISO 8601)
+        const jan4 = new Date(year, 0, 4);
+        const dayOfWeek = jan4.getDay() || 7; // Niedziela = 7
+        
+        // Poniedziałek pierwszego tygodnia
+        const firstMonday = new Date(jan4);
+        firstMonday.setDate(jan4.getDate() - dayOfWeek + 1);
+        
+        // Poniedziałek żądanego tygodnia
+        const targetMonday = new Date(firstMonday);
+        targetMonday.setDate(firstMonday.getDate() + (weekNumber - 1) * 7);
+        
+        // Generuj 7 dni
+        const dates = [];
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(targetMonday);
+            date.setDate(targetMonday.getDate() + i);
+            dates.push(date);
+        }
+        
+        return dates;
+    }
+
+    /**
+     * Formatuje datę jako DD.MM
+     * @param {Date} date 
+     * @returns {string}
+     */
+    static formatDateShort(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        return `${day}.${month}`;
+    }
+
+    /**
+     * Pobiera aktualny rok
+     * @returns {number}
+     */
+    static getCurrentYear() {
+        return new Date().getFullYear();
+    }
+
+    /**
+     * Pobiera aktualny numer tygodnia (ISO 8601)
+     * @returns {number}
+     */
+    static getCurrentWeekNumber() {
+        const now = new Date();
+        const jan4 = new Date(now.getFullYear(), 0, 4);
+        const dayOfWeek = jan4.getDay() || 7;
+        const firstMonday = new Date(jan4);
+        firstMonday.setDate(jan4.getDate() - dayOfWeek + 1);
+        
+        const diff = now - firstMonday;
+        const weekNumber = Math.floor(diff / (7 * 24 * 60 * 60 * 1000)) + 1;
+        return Math.max(1, Math.min(53, weekNumber));
+    }
+
+    /**
+     * Pobiera maksymalną liczbę tygodni w roku
+     * @param {number} year 
+     * @returns {number}
+     */
+    static getWeeksInYear(year) {
+        const dec31 = new Date(year, 11, 31);
+        const jan4 = new Date(year, 0, 4);
+        const dayOfWeek = jan4.getDay() || 7;
+        const firstMonday = new Date(jan4);
+        firstMonday.setDate(jan4.getDate() - dayOfWeek + 1);
+        
+        const diff = dec31 - firstMonday;
+        return Math.ceil(diff / (7 * 24 * 60 * 60 * 1000) / 7);
+    }
+}
+
+// ===================================
 // HISTORY MANAGER (Undo/Redo)
 // ===================================
 
@@ -79,12 +170,32 @@ class BoardStateManager {
 
     createEmptyState() {
         return {
+            year: WeekDateCalculator.getCurrentYear(),
+            weekNumber: WeekDateCalculator.getCurrentWeekNumber(),
             columns: DAYS_OF_WEEK.map((_, index) => ({
                 index,
                 requiredWorkers: 1
             })),
             rows: []
         };
+    }
+
+    /**
+     * Ustawia rok i numer tygodnia
+     * @param {number} year 
+     * @param {number} weekNumber 
+     */
+    setYearAndWeek(year, weekNumber) {
+        this.state.year = year;
+        this.state.weekNumber = Math.max(1, Math.min(53, weekNumber));
+    }
+
+    /**
+     * Pobiera daty dla aktualnie wybranego tygodnia
+     * @returns {Date[]}
+     */
+    getWeekDates() {
+        return WeekDateCalculator.getWeekDates(this.state.year, this.state.weekNumber);
     }
 
     getState() {
@@ -262,7 +373,9 @@ class BoardRenderer {
             pracaCountRow: document.querySelector('.praca-count-row'),
             btnUndo: document.getElementById('btn-undo'),
             btnRedo: document.getElementById('btn-redo'),
-            btnAddRow: document.getElementById('btn-add-row')
+            btnAddRow: document.getElementById('btn-add-row'),
+            yearInput: document.getElementById('year-input'),
+            weekInput: document.getElementById('week-input')
         };
     }
 
@@ -272,6 +385,7 @@ class BoardRenderer {
         this.renderRows();
         this.renderPracaCounts();
         this.updateColumnValidation();
+        this.updateWeekInputs();
     }
 
     renderDaysHeader() {
@@ -279,13 +393,33 @@ class BoardRenderer {
         const existingHeaders = this.elements.daysHeaderRow.querySelectorAll('.day-header-cell');
         existingHeaders.forEach(el => el.remove());
 
+        const weekDates = this.boardManager.getWeekDates();
+
         DAYS_OF_WEEK.forEach((day, index) => {
             const th = document.createElement('th');
             th.className = 'day-header-cell';
             th.dataset.columnIndex = index;
-            th.innerHTML = `<div class="day-header"><span class="day-name">${day}</span></div>`;
+            
+            const dateStr = WeekDateCalculator.formatDateShort(weekDates[index]);
+            th.innerHTML = `<div class="day-header">
+                <span class="day-name">${day}</span>
+                <span class="day-date">${dateStr}</span>
+            </div>`;
             this.elements.daysHeaderRow.appendChild(th);
         });
+    }
+
+    /**
+     * Aktualizuje pola roku i tygodnia w UI
+     */
+    updateWeekInputs() {
+        const state = this.boardManager.getState();
+        if (this.elements.yearInput) {
+            this.elements.yearInput.value = state.year;
+        }
+        if (this.elements.weekInput) {
+            this.elements.weekInput.value = state.weekNumber;
+        }
     }
 
     renderRequiredWorkersSelects() {
@@ -632,6 +766,26 @@ class AppController {
         window.addEventListener('beforeunload', () => {
             this.saveState();
         });
+
+        // Obsługa zmiany roku i tygodnia
+        const yearInput = document.getElementById('year-input');
+        const weekInput = document.getElementById('week-input');
+
+        yearInput.addEventListener('change', (e) => {
+            const year = parseInt(e.target.value);
+            const week = parseInt(weekInput.value);
+            if (year >= 2020 && year <= 2099) {
+                this.handleStateChange('setYearAndWeek', { year, weekNumber: week });
+            }
+        });
+
+        weekInput.addEventListener('change', (e) => {
+            const year = parseInt(yearInput.value);
+            const week = parseInt(e.target.value);
+            if (week >= 1 && week <= 53) {
+                this.handleStateChange('setYearAndWeek', { year, weekNumber: week });
+            }
+        });
     }
 
     handleStateChange(action, data) {
@@ -664,6 +818,9 @@ class AppController {
                 break;
             case 'moveRowDown':
                 this.boardManager.moveRowDown(data.rowIndex);
+                break;
+            case 'setYearAndWeek':
+                this.boardManager.setYearAndWeek(data.year, data.weekNumber);
                 break;
             default:
                 console.warn('Nieznana akcja:', action);
