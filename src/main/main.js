@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, dialog, shell } = require('electron');
 const path = require('path');
 const StorageService = require('../services/StorageService');
 const ExcelGenerator = require('../services/ExcelGenerator');
@@ -68,6 +68,9 @@ class MainProcess {
 
                 // Wygeneruj plik Excel
                 await this.excelGenerator.generateExcel(boardState, result.filePath);
+
+                // Otwórz wygenerowany plik w domyślnej aplikacji (Excel)
+                await shell.openPath(result.filePath);
 
                 return { success: true, filePath: result.filePath };
             } catch (error) {
