@@ -50,15 +50,15 @@ class WeekDateCalculator {
         // Znajdź pierwszy czwartek roku (ISO 8601)
         const jan4 = new Date(year, 0, 4);
         const dayOfWeek = jan4.getDay() || 7; // Niedziela = 7
-        
+
         // Poniedziałek pierwszego tygodnia
         const firstMonday = new Date(jan4);
         firstMonday.setDate(jan4.getDate() - dayOfWeek + 1);
-        
+
         // Poniedziałek żądanego tygodnia
         const targetMonday = new Date(firstMonday);
         targetMonday.setDate(firstMonday.getDate() + (weekNumber - 1) * 7);
-        
+
         // Generuj 7 dni
         const dates = [];
         for (let i = 0; i < 7; i++) {
@@ -66,7 +66,7 @@ class WeekDateCalculator {
             date.setDate(targetMonday.getDate() + i);
             dates.push(date);
         }
-        
+
         return dates;
     }
 
@@ -99,7 +99,7 @@ class WeekDateCalculator {
         const dayOfWeek = jan4.getDay() || 7;
         const firstMonday = new Date(jan4);
         firstMonday.setDate(jan4.getDate() - dayOfWeek + 1);
-        
+
         const diff = now - firstMonday;
         const weekNumber = Math.floor(diff / (7 * 24 * 60 * 60 * 1000)) + 1;
         return Math.max(1, Math.min(53, weekNumber));
@@ -116,7 +116,7 @@ class WeekDateCalculator {
         const dayOfWeek = jan4.getDay() || 7;
         const firstMonday = new Date(jan4);
         firstMonday.setDate(jan4.getDate() - dayOfWeek + 1);
-        
+
         const diff = dec31 - firstMonday;
         return Math.ceil(diff / (7 * 24 * 60 * 60 * 1000) / 7);
     }
@@ -399,7 +399,7 @@ class BoardRenderer {
             const th = document.createElement('th');
             th.className = 'day-header-cell';
             th.dataset.columnIndex = index;
-            
+
             const dateStr = WeekDateCalculator.formatDateShort(weekDates[index]);
             th.innerHTML = `<div class="day-header">
                 <span class="day-name">${day}</span>
