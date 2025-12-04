@@ -8,6 +8,12 @@ const path = require('path');
 class ExcelGenerator {
     constructor() {
         this.templatePath = path.join(__dirname, '../templates/GrafikTemplate.xlsx');
+        
+        // Niemieckie nazwy miesięcy
+        this.germanMonths = [
+            'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+            'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+        ];
     }
 
     /**
@@ -26,6 +32,9 @@ class ExcelGenerator {
 
             // Oblicz daty dla wybranego tygodnia
             const weekDates = this.getWeekDates(boardState.year, boardState.weekNumber);
+
+            // Wypełnij nagłówek/stopkę z miesiącem i rokiem
+            this.fillHeaderFooter(worksheet, weekDates);
 
             // Wypełnij daty w nagłówku (C2:I2)
             this.fillHeaderDates(worksheet, weekDates);
@@ -109,6 +118,70 @@ class ExcelGenerator {
             const cell = worksheet.getCell(2, startColumn + index);
             cell.value = this.formatDateFull(date);
         });
+    }
+
+    /**
+     * Wypełnia nagłówek/stopkę Excel z miesiącem i rokiem
+     * Format: "Dienstplan Glanz Reinigungs-Service GmbH\n[month] [year]"
+     * @param {ExcelJS.Worksheet} worksheet 
+     * @param {Date[]} weekDates 
+     */
+    fillHeaderFooter(worksheet, weekDates) {
+        const monday = weekDates[0];
+        const sunday = weekDates[6];
+
+        // Pobierz nazwy miesięcy
+        const monthText = this.getMonthText(monday, sunday);
+        const year = this.getYearText(monday, sunday);
+
+        // Ustaw nagłówek środkowy z czcionką 14pt
+        // &14 = rozmiar czcionki 14, &"-,Bold" = pogrubienie (opcjonalnie)
+        // &C = środek
+        const headerText = `&C&14Dienstplan Glanz Reinigungs-Service GmbH\n${monthText} ${year}`;
+
+        // ExcelJS używa headerFooter z oddFirst, oddHeader itp.
+        worksheet.headerFooter = {
+            ...worksheet.headerFooter,
+            oddHeader: headerText,
+            evenHeader: headerText,
+            firstHeader: headerText
+        };
+    }
+
+    /**
+     * Pobiera tekst miesiąca dla nagłówka
+     * Jeśli tydzień jest na przełomie miesięcy, zwraca "Miesiąc1/Miesiąc2"
+     * @param {Date} monday - poniedziałek tygodnia
+     * @param {Date} sunday - niedziela tygodnia
+     * @returns {string}
+     */
+    getMonthText(monday, sunday) {
+        const mondayMonth = monday.getMonth();
+        const sundayMonth = sunday.getMonth();
+
+        if (mondayMonth === sundayMonth) {
+            return this.germanMonths[mondayMonth];
+        } else {
+            return `${this.germanMonths[mondayMonth]}/${this.germanMonths[sundayMonth]}`;
+        }
+    }
+
+    /**
+     * Pobiera tekst roku dla nagłówka
+     * Jeśli tydzień jest na przełomie lat, zwraca "Rok1/Rok2"
+     * @param {Date} monday - poniedziałek tygodnia
+     * @param {Date} sunday - niedziela tygodnia
+     * @returns {string}
+     */
+    getYearText(monday, sunday) {
+        const mondayYear = monday.getFullYear();
+        const sundayYear = sunday.getFullYear();
+
+        if (mondayYear === sundayYear) {
+            return String(mondayYear);
+        } else {
+            return `${mondayYear}/${sundayYear}`;
+        }
     }
 
     /**
