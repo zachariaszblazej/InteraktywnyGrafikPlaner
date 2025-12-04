@@ -374,6 +374,7 @@ class BoardRenderer {
             btnUndo: document.getElementById('btn-undo'),
             btnRedo: document.getElementById('btn-redo'),
             btnAddRow: document.getElementById('btn-add-row'),
+            btnGenerateExcel: document.getElementById('btn-generate-excel'),
             yearInput: document.getElementById('year-input'),
             weekInput: document.getElementById('week-input')
         };
@@ -786,6 +787,33 @@ class AppController {
                 this.handleStateChange('setYearAndWeek', { year, weekNumber: week });
             }
         });
+
+        // Przycisk generowania Excel
+        document.getElementById('btn-generate-excel').addEventListener('click', () => {
+            this.generateExcel();
+        });
+    }
+
+    /**
+     * Generuje plik Excel z aktualnym stanem tablicy
+     */
+    async generateExcel() {
+        try {
+            const boardState = this.boardManager.getState();
+            const result = await window.electronAPI.generateExcel(boardState);
+
+            if (result.success) {
+                console.log('Plik Excel wygenerowany:', result.filePath);
+            } else if (result.canceled) {
+                console.log('Generowanie anulowane przez użytkownika');
+            } else {
+                console.error('Błąd generowania:', result.error);
+                alert('Błąd podczas generowania pliku Excel: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Błąd generowania Excel:', error);
+            alert('Błąd podczas generowania pliku Excel: ' + error.message);
+        }
     }
 
     handleStateChange(action, data) {

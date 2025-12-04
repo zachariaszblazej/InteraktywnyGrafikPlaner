@@ -75,7 +75,7 @@ body {
 }
 
 .header-spacer {
-    width: 350px;
+    width: 500px;
     /* Szerokość toolbara żeby wycentrować tytuł */
 }
 
@@ -86,7 +86,8 @@ body {
     display: flex;
     gap: var(--spacing-sm);
     align-items: center;
-    width: 350px;
+    width: 500px;
+    flex-wrap: wrap;
 }
 
 .toolbar-btn {
@@ -153,6 +154,18 @@ body {
 .week-input:focus {
     outline: none;
     border-color: var(--primary-color);
+}
+
+/* Generate Excel Button */
+.btn-generate-excel {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+    white-space: nowrap;
+}
+
+.btn-generate-excel:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
 }
 
 /* ===================================

@@ -1,11 +1,13 @@
-const { app, BrowserWindow, ipcMain, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, dialog } = require('electron');
 const path = require('path');
 const StorageService = require('../services/StorageService');
+const ExcelGenerator = require('../services/ExcelGenerator');
 
 class MainProcess {
     constructor() {
         this.mainWindow = null;
         this.storageService = new StorageService();
+        this.excelGenerator = new ExcelGenerator();
     }
 
     createWindow() {
@@ -40,6 +42,38 @@ class MainProcess {
         // Wczytywanie stanu
         ipcMain.handle('load-state', async () => {
             return this.storageService.loadState();
+        });
+
+        // Generowanie pliku Excel
+        ipcMain.handle('generate-excel', async (event, boardState) => {
+            try {
+                // Wygeneruj domyślną nazwę pliku
+                const defaultFileName = this.excelGenerator.generateDefaultFileName(
+                    boardState.year,
+                    boardState.weekNumber
+                );
+
+                // Pokaż dialog zapisu pliku
+                const result = await dialog.showSaveDialog(this.mainWindow, {
+                    title: 'Zapisz grafik jako Excel',
+                    defaultPath: `${defaultFileName}.xlsx`,
+                    filters: [
+                        { name: 'Pliki Excel', extensions: ['xlsx'] }
+                    ]
+                });
+
+                if (result.canceled || !result.filePath) {
+                    return { success: false, canceled: true };
+                }
+
+                // Wygeneruj plik Excel
+                await this.excelGenerator.generateExcel(boardState, result.filePath);
+
+                return { success: true, filePath: result.filePath };
+            } catch (error) {
+                console.error('Błąd podczas generowania Excel:', error);
+                return { success: false, error: error.message };
+            }
         });
     }
 
