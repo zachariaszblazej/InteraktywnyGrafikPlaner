@@ -8,12 +8,24 @@ const path = require('path');
 class ExcelGenerator {
     constructor() {
         this.templatePath = path.join(__dirname, '../templates/GrafikTemplate.xlsx');
-        
+
         // Niemieckie nazwy miesięcy
         this.germanMonths = [
             'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
             'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
         ];
+
+        // Konfiguracja sekcji pracowników
+        this.FIRST_SECTION_START_ROW = 4;
+        this.SECTION_HEIGHT = 3;
+        this.LAST_SECTION_START_ROW = 85; // A85:J87
+        this.DAYS_START_COLUMN = 3; // kolumna C
+        this.DAYS_END_COLUMN = 9; // kolumna I
+        this.NAME_COLUMN = 1; // kolumna A
+
+        // Kolory formatowania warunkowego
+        this.COLOR_EXCLUDED = 'C6EFCE'; // pracownik niebrany pod uwagę
+        this.COLOR_INCLUDED = 'FFCC99'; // pracownik brany pod uwagę / pusta sekcja
     }
 
     /**
@@ -41,6 +53,9 @@ class ExcelGenerator {
 
             // Wypełnij sekcje pracowników
             this.fillEmployeeSections(worksheet, boardState.rows);
+
+            // Dodaj formatowanie warunkowe dla wszystkich sekcji
+            this.applyConditionalFormatting(worksheet, boardState.rows);
 
             // Zapisz plik z zachowaniem formatowania
             await workbook.xlsx.writeFile(outputPath);
@@ -191,25 +206,85 @@ class ExcelGenerator {
      * @param {Array} rows - lista pracowników
      */
     fillEmployeeSections(worksheet, rows) {
-        const FIRST_SECTION_START_ROW = 4;
-        const SECTION_HEIGHT = 3; // każda sekcja ma 3 wiersze
-        const NAME_COLUMN = 1; // kolumna A
-        const DAYS_START_COLUMN = 3; // kolumna C
-
         rows.forEach((employee, employeeIndex) => {
-            // Oblicz wiersz początkowy dla tej sekcji
-            const sectionStartRow = FIRST_SECTION_START_ROW + (employeeIndex * SECTION_HEIGHT);
+            const sectionStartRow = this.FIRST_SECTION_START_ROW + (employeeIndex * this.SECTION_HEIGHT);
 
-            // Wpisz nazwę pracownika do komórki A{sectionStartRow}
-            const nameCell = worksheet.getCell(sectionStartRow, NAME_COLUMN);
+            // Wpisz nazwę pracownika
+            const nameCell = worksheet.getCell(sectionStartRow, this.NAME_COLUMN);
             nameCell.value = employee.header || '';
 
             // Wypełnij dni tygodnia (C:I w pierwszym wierszu sekcji)
             employee.tiles.forEach((tile, dayIndex) => {
-                const cell = worksheet.getCell(sectionStartRow, DAYS_START_COLUMN + dayIndex);
+                const cell = worksheet.getCell(sectionStartRow, this.DAYS_START_COLUMN + dayIndex);
                 cell.value = this.getTileValue(tile.state);
             });
         });
+    }
+
+    /**
+     * Stosuje formatowanie warunkowe dla wszystkich sekcji pracowników
+     * @param {ExcelJS.Worksheet} worksheet 
+     * @param {Array} rows - lista pracowników
+     */
+    applyConditionalFormatting(worksheet, rows) {
+        const totalSections = this.getTotalSectionsCount();
+
+        for (let sectionIndex = 0; sectionIndex < totalSections; sectionIndex++) {
+            const sectionStartRow = this.FIRST_SECTION_START_ROW + (sectionIndex * this.SECTION_HEIGHT);
+            const employee = rows[sectionIndex];
+
+            // Określ kolor: excluded (#C6EFCE) lub included/empty (#FFCC99)
+            const isExcluded = employee && !employee.includedInCalculations;
+            const bgColor = isExcluded ? this.COLOR_EXCLUDED : this.COLOR_INCLUDED;
+
+            this.addConditionalFormattingToRow(worksheet, sectionStartRow, bgColor);
+        }
+    }
+
+    /**
+     * Dodaje formatowanie warunkowe do wiersza sekcji pracownika
+     * @param {ExcelJS.Worksheet} worksheet 
+     * @param {number} row - numer wiersza
+     * @param {string} bgColor - kolor tła (hex bez #)
+     */
+    addConditionalFormattingToRow(worksheet, row, bgColor) {
+        for (let col = this.DAYS_START_COLUMN; col <= this.DAYS_END_COLUMN; col++) {
+            const cellRef = this.getCellRef(row, col);
+
+            worksheet.addConditionalFormatting({
+                ref: cellRef,
+                rules: [{
+                    type: 'expression',
+                    formulae: [`NOT(OR(${cellRef}="",${cellRef}="U",${cellRef}="A"))`],
+                    style: {
+                        fill: {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            bgColor: { argb: `FF${bgColor}` }
+                        }
+                    }
+                }]
+            });
+        }
+    }
+
+    /**
+     * Zwraca referencję komórki (np. "C4")
+     * @param {number} row 
+     * @param {number} col 
+     * @returns {string}
+     */
+    getCellRef(row, col) {
+        const colLetter = String.fromCharCode(64 + col); // 3 -> C, 4 -> D, etc.
+        return `${colLetter}${row}`;
+    }
+
+    /**
+     * Oblicza całkowitą liczbę sekcji w szablonie
+     * @returns {number}
+     */
+    getTotalSectionsCount() {
+        return Math.floor((this.LAST_SECTION_START_ROW - this.FIRST_SECTION_START_ROW) / this.SECTION_HEIGHT) + 1;
     }
 
     /**
